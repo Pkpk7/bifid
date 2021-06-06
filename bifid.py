@@ -1,15 +1,22 @@
 from string import ascii_uppercase
 import random
-import time
+from time import time as tm
 import math
 from ngram import Ngram_score
 
-ng = Ngram_score('english_quadgrams.txt')
+ngs = Ngram_score('english_quadgrams.txt')
 
+alfabet = ''.join( [chr(65+i) for i in range(26)])
 
 def generacjaKlucza(len):
     return(''.join(random.sample(alfabet, len)))
 
+def zmienCzescKlucza(len, klucz):
+    r = random.randint(0, len)
+    klucz = list(klucz)
+    klucz[r-1] = list(alfabet)[random.randint(0,25)]
+    klucz = ''.join(klucz)
+    return klucz
 
 def utworzSzachownice(klucz):
     alfabet = ""
@@ -92,37 +99,41 @@ def decrypt(tekst, klucz):
 
 
 def swap2(key):
-    key2 = key.copy()
-    r1, r2 = sorted(random.sample(range(len(key)), 2))
+    key2 = list(key)
+    r1, r2 = random.sample(range(len(key)), 2)
     key2[r1], key2[r2] = key2[r2], key2[r1]
-    return(key2)
+    return(''.join(key2))
 
 
 def swap3(key):
-    key2 = key.copy()
-    r1, r2, r3 = sorted(random.sample(range(len(key)), 3))
+    key2 = list(key)
+    r1, r2, r3 = random.sample(range(len(key)), 3)
     if random.random() < 0.5:
         key2[r1], key2[r2], key2[r3] = key2[r2], key2[r3], key2[r1]
     else:
         key2[r1], key2[r2], key2[r3] = key2[r3], key2[r1], key2[r2]
-    return(key2)
+    return(''.join(key2))
 
 
 def shift(key):
-    r = random.choice(range(len(key)))
-    return(key[r:] + key[:r])
+    return(generacjaKlucza(len(key)))
+
+def smallShift(key):
+    return zmienCzescKlucza(len(key), key)
 
 
 def changekey(key):
     key2 = key
     r = random.random()
-    if r < 0.8:
-        key3 = swap2(key2)
-    elif r < 0.85:
-        key3 = shift(key2)
+    if r < 0.4:
+        key2 = swap2(key2)
+    elif r<0.8:
+        key2 = smallShift(key2)
+    elif r <0.85:
+        key2 = shift(key2)
     else:
-        key3 = swap3(key2)
-    return(key3)
+        key2 = swap3(key2)
+    return(key2)
 
 
 def funkcjaAkceptacji(rozn, t):
@@ -226,7 +237,7 @@ def wspinaczkaZRestartem2(kt, dl):
     return([wyniki[0][0], wyniki[0][1], tm()-t0])
 
 
-lenkey = 10
+lenkey = 3
 key = generacjaKlucza(lenkey)
 print('key =', key)
 
